@@ -1,0 +1,21 @@
+spring.application.name=B14aSMTP_Naver
+
+# 포트 설정
+server.port = 8586
+
+# JSP 설정
+spring.mvc.view.prefix=/WEB-INF/views/
+spring.mvc.view.suffix=.jsp
+
+# SMTP 설정
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=dbrgusgml@gmail.com
+spring.mail.password=zrth gvli cpdh abwr
+
+# 메일발송에 필요한 여러가지 속성값 설정. SSL, 디버그 등
+spring.mail.properties.mail.debug=true
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.auth=false

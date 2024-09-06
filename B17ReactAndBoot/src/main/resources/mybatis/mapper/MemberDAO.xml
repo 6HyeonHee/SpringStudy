@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Mapper 파일을 구성하기 위한 Doctype 설정 -->
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+Controller와 Mapper 사이에서 매개역할을 하는 인터페이스를 namespace로
+지정한다. xml 파일에서는 클래스에 대한 import가 불가능하므로 아래와 같이
+패키지의 풀 경로를 기술해야 한다. 
+ -->
+<mapper namespace = "com.edu.springboot.restboard.IBoardService">
+
+	<!-- 각 페이지에 출력할 레코드를 구간을 통해 인출 -->
+	<select id="list"
+		parameterType = "com.edu.springboot.restboard.ParameterDTO"
+		resultType = "com.edu.springboot.restboard.BoardDTO">
+		SELECT * FROM (
+			SELECT Tb.*, rownum rNum FROM (
+				SELECT * FROM board ORDER BY num DESC
+			) Tb
+		)
+		WHERE rNum BETWEEN #{start} AND #{end}
+	</select>
+	
+	<!-- 스페이스로 구분된 검색어를 반복문을 통해 OR절로 연결해주는 쿼리문 -->
+	<select id="search"
+		parameterType = "com.edu.springboot.restboard.ParameterDTO"
+		resultType = "com.edu.springboot.restboard.BoardDTO">
+		SELECT * FROM board
+		<!-- 검색어가 있는 경우 WHERE절을 추가한다. -->
+		<if test = "searchWord != null">
+			WHERE
+			<!-- 검색어의 개수만큼 반복해서 OR로 연결된 조건을 추가한다. -->
+			<foreach collection = "searchWord" item = "str"
+				open = "(" close = ")" separator = "or">
+				${searchField} like '%' || #{str} || '%'	
+			</foreach>
+		</if>
+		ORDER BY num DESC
+	</select>
+	
+	<select id="view"
+		parameterType = "com.edu.springboot.restboard.ParameterDTO"
+		resultType = "com.edu.springboot.restboard.BoardDTO">
+		SELECT * FROM board WHERE num = #{num}
+	</select>
+	
+	<insert id="write"
+		parameterType = "com.edu.springboot.restboard.BoardDTO">
+		INSERT INTO board (num, title, content, id, visitcount)
+		VALUES
+		(seq_board_num.nextval, #{title}, #{content}, #{id}, 0)
+	</insert>
+	
+</mapper>

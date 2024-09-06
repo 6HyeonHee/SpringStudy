@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Mapper를 제작하기 위한 Doctype 선언 -->
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 컨트롤러가 호출하는 인터페이스의 위치를 namespce로 설정 -->
+<mapper namespace="com.edu.springboot.jdbc.IBoardService">
+	
+	<!-- 
+	목록에서 게시물의 갯수를 카운트한다. count() 함수를 사용하므로 resultType은
+	int형으로 명시해야한다. 또한 파라미터를 저장한 DTO를 사용하므로 parameterType도
+	명시되어있다.
+	 -->
+	<select id="getTotalCount" 
+		resultType="int"
+		parameterType="com.edu.springboot.jdbc.ParameterDTO">
+		
+		SELECT COUNT(*) FROM myboard
+		<!-- 검색어가 있는 경우에만 where절을 동적으로 추가한다. -->
+		<if test="searchKeyword!=null
+			and !searchKeyword.equals('')">
+		WHERE ${searchField} LIKE '%' || #{searchKeyword} || '%'
+		</if>	
+	</select>
+	
+	<!-- 
+	목록 : 페이지에 출력할 게시물을 인출한다. 레코드를 인출한 결과를 반환하므로
+		resultType은 DTO객체로 설정한다. Mapper는 인출된 결과를 1차로
+		DTO에 저장한 후 2차로 List에 추가하여 반환해준다.
+	 -->
+	<select id="listPage"
+		resultType="com.edu.springboot.jdbc.BoardDTO"
+		parameterType="com.edu.springboot.jdbc.ParameterDTO">
+	
+		SELECT * FROM (
+			SELECT Tb.*, rownum rNum FROM (
+				SELECT * FROM myboard
+				<if test="searchKeyword!=null
+					and !searchKeyword.equals('')">
+				WHERE ${searchField} LIKE
+					'%'||#{searchKeyword}||'%'
+				</if>
+				ORDER BY idx DESc
+			) Tb
+		)
+		WHERE rNum<![CDATA[>=]]>#{start}
+			AND rNum<![CDATA[<=]]>#{end}
+	</select>
+	<!-- 
+	CDATA : unparsed Character Data. 즉 파싱되지 않는 문자데이터라는 뜻이다.
+		Mapper는 XML이므로 꺽쇄괄호로 시작하는 모든 문자열을 엘리먼트로 판단하기
+		때문에 쿼리문 사이의 비교연산자를 사용하면 에러가 발생한다. 따라서 파싱되지
+		않는 문자라는 것을 명시하기 위해 CDATA를 사용해야한다.
+	 -->
+	
+	<!-- 
+	입력 : @Param 어노테이션으로 변경된 이름으로 인파라미터를 설정한다.
+	 -->
+	<insert id="write">
+		INSERT INTO myboard (idx, name, title, content)
+		VALUES
+		(seq_board_num.nextval, #{_name}, #{_title}, #{_content})
+	</insert>
+	
+	<!-- 
+	열람 : 게시물의 일련번호를 DTO를 통해 받은 후 select하고,
+		결과를 다시 DTO에 저장 후 반환한다.
+	 -->
+	<select id="view" 
+		resultType="com.edu.springboot.jdbc.BoardDTO"
+		parameterType="com.edu.springboot.jdbc.BoardDTO">
+		SELECT * FROM myboard WHERE idx=#{idx}
+	</select>
+	
+	<!-- 
+	수정 : update쿼리문의 실행결과는 정수이므로 resultType은 생략한다.
+		폼값전체를 저장한 DTO객체를 parameterType으로 설정한다.
+	 -->
+	<update id="edit" parameterType="com.edu.springboot.jdbc.BoardDTO">
+		UPDATE myboard SET
+		name=#{name}, title=#{title}, content=#{content}
+		WHERE idx=#{idx}
+	</update>
+	
+	<!-- 
+	삭제 : parameterType을 별도로 명시하지 않는 경우에는 파라미터의 순서대로
+		pram1, param2 ...와 같이 인파라미터를 설정할 수 있다. 
+	-->
+	<delete id="delete">
+		DELETE FROM myboard WHERE idx=#{param1}
+	</delete>
+	
+	<!-- 
+	조회수 증가
+	 -->
+	<update id="visitCountPlus" parameterType="com.edu.springboot.jdbc.BoardDTO">
+    UPDATE myboard SET visitcount=visitcount+1
+    WHERE idx=#{idx}
+	</update>
+	
+</mapper>

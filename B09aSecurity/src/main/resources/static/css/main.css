@@ -1,0 +1,9 @@
+*{
+	font-size: 12px;
+	font-family: verdana;
+}
+.spring{
+	width: 100%;
+	height: 187px;
+	background: url('../images/security.jpg') repeat;
+}

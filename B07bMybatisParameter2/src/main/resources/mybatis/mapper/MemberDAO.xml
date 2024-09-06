@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Mapper 파일을 구성하기 위한 Doctype 설정 -->
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edu.springboot.jdbc.IMemberService">
+	
+	<!-- 
+	조건문은 <if>태그로 정의 : test에 조건을 추가한다. 전체적인 사용법은
+		JSTL과 동일하다.
+	반복문은 <foreach>태그로 정의
+		collection : 반복을 위해 사용할 컬렉션 변수명을 지정
+		item : 반복시 해당 루프에서 반환되는 객체를 저장
+		open : 쿼리문 시작 부분에 추가할 문자열
+		close : 쿼리문 종료 부분에 추가할 문자열
+		separator : 쿼리문을 반복할 때 구분자로 사용할 항목
+	 -->
+	<select id="select"
+		parameterType="com.edu.springboot.jdbc.MemberDTO"
+		resultType="com.edu.springboot.jdbc.MemberDTO">
+		SELECT * FROM member 
+		<!-- 
+		파라미터 형식이
+			요청명?searchKeyword=abc	=> 값이 있음
+			요청명?searchKeyword=		=> 빈값으로 지정됨. ''로 체크해야함.
+			요청명?					=> null로 지정. 따라서 null인지 체크
+		 -->
+		<if test="searchKeyword!=null and !searchKeyword.equals('')">
+			WHERE
+			<!-- 
+			like절이 있는 쿼리문을 or로 연결해서 2개 이상의 항목이 들어간 쿼리문을
+			생성해준다. 가령 이름과 아이디를 선택했고, 검색어로 a를 입력했다면 다음과
+			같이 생성된다.
+			(name like '%a%' or id like '%a%')
+			 -->
+			<foreach collection="searchField" item="sfield" open="(" close=")"
+				separator="or">
+				${sfield} like '%' || #{searchKeyword} || '%'
+			</foreach>
+		</if>
+		ORDER BY regidate DESC
+	</select>
+	<!-- 
+	회원등록 : request 내장객체를 통해 받은 파라미터를 개별적으로 전달한 값으로
+		인파라미터를 채워준다. 이 경우 DTO를 사용하지 않으므로 parameterType은
+		명시할 필요가 없다.
+		전달되는 3개의 인수는 순서대로 param1, 2, 3과 같이 명시하면 된다.
+	 -->
+	<insert id="insert">
+		INSERT INTO member (id, pass, name) VALUES
+			(#{param1}, #{param2}, #{param3})
+	</insert>
+	
+	<!-- 
+	회원정보불러오기 : 파라미터를 받은 후 @Param 어노테이션으로 이름을 변경해서
+		전달한다. Mapper에서는 변경된 이름으로 인파라미터를 설정할 수 있다.
+	 -->
+	<select id="selectOne"
+		resultType="com.edu.springboot.jdbc.MemberDTO">
+		SELECT * FROM member WHERE id=#{_id}
+	</select>
+	<!-- 
+	수정처리 : Map에 저장된 파라미터를 받으므로 parameterType에 Map을 명시한다.
+		이 경우에도 패키지의 풀경로를 입력한다. 그리고 Key로 저장된 값을 얻어온 후
+		인파라미터를 설정할 수 있다.
+	 -->
+	<update id="update"
+		parameterType="java.util.HashMap">
+		UPDATE member SET pass=#{m_pass},
+			name=#{m_name} WHERE id=#{m_id}	
+	</update>
+	
+	<!-- 삭제처리 : 파라미터 순서대로 배열처럼 0,1,2..와 같이
+				인파라미터를 설정할 수 있다. -->
+	<delete id="delete">
+		DELETE FROM member WHERE id=#{0}
+	</delete>
+</mapper>

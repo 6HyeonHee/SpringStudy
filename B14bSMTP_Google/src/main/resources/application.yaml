@@ -1,0 +1,26 @@
+# 포트설정
+server:
+  port: '8586'
+
+# JSP 설정
+spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+
+  # SMTP 설정
+  mail:
+    host: smtp.gmail.com
+    port: '587'
+    username: dbrgusgml@gmail.com
+    password: zrth gvli cpdh abwr
+    properties:
+      mail:
+        debug: 'true'
+        smtp:
+          connectiontimeout: '5000'
+          auth: 'false'
+          starttls:
+            enable: 'true'
+            required: 'true'
