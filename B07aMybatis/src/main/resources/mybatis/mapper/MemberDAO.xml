@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Mapper 파일을 구성하기 위한 Doctype 설정 -->
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+컨트롤러와 Mapper 사이에서 매개역할을 하는 인터페이스를 namespace로 지정한다.
+xml파일에서는 클래스에 대한 import가 불가능 하므로 아래와 같이
+패키지의 풀 경로를 기술해야한다.
+-->
+<mapper namespace="com.edu.springboot.jdbc.IMemberService">
+
+	<!-- 
+	맵퍼에서 쿼리문을 실행하기 위한 엘리먼트
+	: DML의 4가지 쿼리와 동일한 이름의 엘리먼트가 존재한다.
+	즉 select 쿼리는 <select>엘리먼트를 사용하면 된다.
+	
+	하위 프로퍼티
+	-id : 컨트롤러에서 호출하기 위한 메서드명을 기술한다. Java와 같이 메서드의
+		원형을 사용하지 않고, 단지 메서드명만 명시하면 된다.
+	- resultType : 쿼리문 실행 후 반환할 결과의 타입을 명시한다. select문의
+		경우 ResultSet이 반환되므로, 이를 저장하기 위한 DTO를 지정하면 되고
+		갯수가 많은 경우 Mapper가 알아서 List에 add() 해준다.
+		insert, delete, update와 같이 행의 변화가 있는 쿼리문은 결과로
+		int를 반환하므로 resultType을 명시하지 않는다.
+	- parameterType : 메서드 호출 시 파라미터로 사용할 클래스명을 명시한다.
+		개발자가 직접 정의한 클래스외에도 Map, List와 같은 컬렉션을 사용할 수 있다.
+	 -->
+
+	<!-- 컨트롤러에서 select()를 호출하면 id 속성에 함수명과 동일한
+	속성값을 가진 엘리먼트가 실행된다. -->
+	<select id="select"
+		resultType="com.edu.springboot.jdbc.MemberDTO">
+		SELECT * FROM member ORDER BY regidate DESC
+	</select>
+	
+	<!-- 
+	회원등록 : parameterType으로 명시한 DTO 객체의 멤버변수명을 통해
+		쿼리문의 인파라미터를 설정한다. EL과 동일하게 DTO에 정의한 getter를
+		통해 값을 얻어와 세팅한다.
+		insert의 경우 반환타입은 무조건 정수형이므로  resultType은 생략할 수 있다.
+	 -->
+	<insert id="insert"
+		parameterType="com.edu.springboot.jdbc.MemberDTO">
+		INSERT INTO member (id, pass, name) VALUES
+			(#{id}, #{pass}, #{name})
+	</insert>
+	
+	<!-- 회원정보를 select하여 DTO에 저장 후 반환한다. -->
+	<select id="selectOne"
+		parameterType="com.edu.springboot.jdbc.MemberDTO"
+		resultType="com.edu.springboot.jdbc.MemberDTO">
+		SELECT * FROM member WHERE id=#{id}
+	</select>
+	<!-- 회원정보를 수정한 결과를 반환하므로 resultType은 명시하지 않는다. -->
+	<update id="update"
+		parameterType="com.edu.springboot.jdbc.MemberDTO">
+		UPDATE member SET pass=#{pass},
+			name=#{name} WHERE id=#{id}	
+	</update>
+	
+	<!-- 회원정보 삭제 -->
+	<delete id="delete"
+		parameterType="com.edu.springboot.jdbc.MemberDTO">
+		DELETE FROM member WHERE id=#{id}
+	</delete>
+</mapper>
