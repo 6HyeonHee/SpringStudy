@@ -70,5 +70,12 @@
 		<li><a href="/boardView.do">내용보기</a></li>
 		<li><a href="/boardListView.do">퀴즈] 목록 + 내용보기</a></li>
 	</ul>
+	
+	<h2>CRUD 인클루드(webbapp 하위)</h2>
+	<%@ include file="../../crud/index.html" %>
+	
+	<h2>React board 인클루드(static 하위)</h2>
+	<!-- 이부분은 동작 안됨 -->
+	<c:import url="/static/rboard/index.html" />
 </body>
 </html>

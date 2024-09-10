@@ -41,6 +41,7 @@ function errCallBack(errData) {
 </head>
 <body>
 	<div class="container">
+		<%@ include file="/link.jsp" %>
 		<h2>게시판 API 활용하여 내용 출력하기</h2>
 		<table class="table table-bordered">
 			<tr>
